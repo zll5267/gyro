@@ -76,6 +76,7 @@ public class SensorInfo implements Serializable {
     public void setmAccZ(float mAccZ) {
         this.mAccZ = mAccZ;
     }
+
     public String toString() {
         return "mGyroX:" + mGyroX + ", mGyroY:" + mGyroY + ", mGyroZ:" + mGyroZ +
                 ", mAccX:" + mAccZ + ", mAccY:" + mAccY + ", mAccZ:" + mAccZ + "\n\r";

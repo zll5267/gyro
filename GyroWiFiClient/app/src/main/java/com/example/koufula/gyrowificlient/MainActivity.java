@@ -222,22 +222,24 @@ public class MainActivity extends AppCompatActivity {
         }
         */
         private class ReadThread implements Runnable {
-
+            byte[] bytes = new byte[1024];
+            int i = 0;
             public void run() {
                 while (true) {
                     try {
-                        byte[] bytes = new byte[1024];
                         Object obj = null;
-                        if (in.read(bytes) > 0) {
+                        int len = 0;
+                        if ((len = in.read(bytes)) > 0) {
 
                             // bytearray to object
 
-                            ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
+                            ByteArrayInputStream bi = new ByteArrayInputStream(bytes, 0, len);
                             ObjectInputStream oi = new ObjectInputStream(bi);
                             obj = oi.readObject();
 
                             SensorInfo si = (SensorInfo)obj;
-                            String result = "String" + si;
+                            i++;
+                            String result = "String("  + i + "):" + si;
                             receiveBuffer = result.getBytes();
                             bi.close();
                             oi.close();

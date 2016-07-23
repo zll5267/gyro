@@ -138,8 +138,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    class ServerThread extends Thread{ private int port;
-        public ServerThread (String port){
+    class ServerThread extends Thread{
+        private int port;
+        public ServerThread (String port) {
             this.port = Integer.parseInt(port);
         }
         public void run(){
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                         //发送数据
                         if(sendBuffer != null){
                             //tss.sendMessage(1821,buffer);
-                            tss.sendMessage(sendBuffer);
+                            //tss.sendMessage(sendBuffer);
                             sendBuffer = null;
                             //清空，不让它连续发
                         }
