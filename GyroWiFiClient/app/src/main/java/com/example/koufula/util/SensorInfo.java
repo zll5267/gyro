@@ -1,4 +1,4 @@
-package com.example.koufula.gyrowificlient;
+package com.example.koufula.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

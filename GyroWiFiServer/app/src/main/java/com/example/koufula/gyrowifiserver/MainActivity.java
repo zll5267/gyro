@@ -8,7 +8,6 @@ import android.hardware.SensorManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,7 +26,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import com.example.koufula.gyrowifiserver.SensorInfo;
+import com.example.koufula.util.SensorInfo;
 
 public class MainActivity extends AppCompatActivity {
     private Button start = null;

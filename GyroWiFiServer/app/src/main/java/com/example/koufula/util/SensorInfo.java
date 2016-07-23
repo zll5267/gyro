@@ -1,4 +1,4 @@
-package com.example.koufula.gyrowifiserver;
+package com.example.koufula.util;
 
 import java.io.Serializable;
 
