@@ -12,12 +12,12 @@ emu2: which is the AVD emulator to run the server app.
 
 
 
-     emu1            emu2
-   ----------     ----------            
-   |        |     |        | listen on 8888
-   | client |     | Server |
-   |        |     |        |
-   ----------      --------- 
+     emu1                         emu2
+   ----------                ----------            
+   |        | request on     |        | listen on
+   | client | 12345          | Server | 8888
+   |        |                |        |
+   ----------                 --------- 
 
 
 
