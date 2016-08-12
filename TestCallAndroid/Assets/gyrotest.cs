@@ -7,6 +7,11 @@ public class gyrotest : MonoBehaviour {
 	public  InputField port;
 	public  InputField backup;
 	public  Text text;
+	private bool connect = false;
+	private float oldValue = 0;
+	private float newValue = 0;
+	private float minValue = 0;
+	private float maxValue = 0;
 
 	// Update is called once per frame
 	void Update () {
@@ -15,7 +20,23 @@ public class gyrotest : MonoBehaviour {
 		{
 			Application.Quit();
 		}
-
+		if (connect) {
+			AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
+			AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject> ("currentActivity");
+			float mGyrox = jo.Call<float> ("getSensorInfoX");
+			backup.text = mGyrox.ToString ();
+			oldValue = newValue;
+			newValue = mGyrox;
+			float delta = newValue - oldValue;
+			if (delta > maxValue) {
+				maxValue = delta;
+			} else if (delta < minValue) {
+				minValue = delta;
+			}
+			string maxs = maxValue.ToString ();
+			string minx = minValue.ToString ();
+			text.text = "max:" +  maxs + ", min:" + minx;
+		}
 	}
 
 	public void getGyroxInUnity(){
@@ -34,5 +55,6 @@ public class gyrotest : MonoBehaviour {
 		AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
 		AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject> ("currentActivity");
 		jo.Call("startDataReceiveThread",ip.text,port.text);
+		connect = true;
 	}
 }
