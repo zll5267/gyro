@@ -15,7 +15,9 @@ public class gyrotest : MonoBehaviour {
 		{
 			Application.Quit();
 		}
+
 	}
+
 	public void getGyroxInUnity(){
 		
 		AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
@@ -26,6 +28,7 @@ public class gyrotest : MonoBehaviour {
 		//backup.text = fe1.ToString ();
 		//text.text = mGyrox.ToString ();
 		backup.text = mGyrox.ToString ();
+
 	}
 	public void setIpPorttoAndroid(){
 		AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
