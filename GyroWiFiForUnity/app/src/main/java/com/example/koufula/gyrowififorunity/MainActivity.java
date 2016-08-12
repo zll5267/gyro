@@ -20,6 +20,9 @@ public class MainActivity extends UnityPlayerActivity {
     }
     public void startDataReceiveThread(String ipaddress, String port) {
         int iPort = Integer.parseInt(port);
+        Log.d(DEBUG_TAG, "MainActivity: Start dataReceiveThread");
+        Log.d(DEBUG_TAG, "Ip address is " +ipaddress );
+        Log.d(DEBUG_TAG, "port is  " +port );
         dataReceiveThread = new DataReceiveThread(ipaddress, iPort);
         new Thread(dataReceiveThread).start();
     }

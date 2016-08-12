@@ -18,7 +18,7 @@ public class SensorInfo implements Serializable {
     private float mAccX;
     private float mAccY;
     private float mAccZ;
-
+    private static final long serialVersionUID =1L;
 
     public SensorInfo() {
 
