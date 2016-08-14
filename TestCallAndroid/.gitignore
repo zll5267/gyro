@@ -1,13 +1,5 @@
-*.iml
 *.apk
 Assembly-CSharp.csproj
 /ProjectSettings/ProjectSettings.asset
 /Library
 /Temp
-/local.properties
-/.idea/workspace.xml
-/.idea/*.xml
-/.idea/libraries
-.DS_Store
-/build
-/captures
