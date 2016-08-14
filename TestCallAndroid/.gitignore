@@ -1,6 +1,5 @@
 /Library
 /Temp
-/ProjectSettings/ProjectSettings.asset
 *.apk
 *.userprefs
 *.csproj
