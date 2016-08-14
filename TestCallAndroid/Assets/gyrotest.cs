@@ -12,6 +12,12 @@ public class gyrotest : MonoBehaviour {
 	private float newValue = 0;
 	private float minValue = 0;
 	private float maxValue = 0;
+	private const float maxY = 158;
+	private const float minY = 155;
+	private int flag = 1;
+
+	public GameObject cube;
+	private Vector3 cubecurrentposition;
 
 	// Update is called once per frame
 	void Update () {
@@ -33,9 +39,24 @@ public class gyrotest : MonoBehaviour {
 			} else if (delta < minValue) {
 				minValue = delta;
 			}
-			string maxs = maxValue.ToString ();
-			string minx = minValue.ToString ();
-			text.text = "max:" +  maxs + ", min:" + minx;
+			//string maxs = maxValue.ToString ();
+			//string minx = minValue.ToString ();
+			//text.text = "max:" +  maxs + ", min:" + minx;
+
+
+			if (delta > 0.1 || delta < -0.1) {
+				text.text = delta.ToString();
+				cubecurrentposition = cube.transform.position;
+				cubecurrentposition.y = cube.transform.position.y + delta * flag;
+				if (cubecurrentposition.y > maxY) {
+					cubecurrentposition.y = minY;
+					flag = flag * -1;
+				} else if (cubecurrentposition.y < minY) {
+					cubecurrentposition.y = maxY;
+					flag = flag * -1;
+				}
+				cube.transform.position = cubecurrentposition;
+			}
 		}
 	}
 
