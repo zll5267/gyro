@@ -1,5 +1,7 @@
-*.apk
-Assembly-CSharp.csproj
-/ProjectSettings/ProjectSettings.asset
 /Library
 /Temp
+/ProjectSettings/ProjectSettings.asset
+*.apk
+*.userprefs
+*.csproj
+*.sln
