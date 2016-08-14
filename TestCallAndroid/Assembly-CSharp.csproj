@@ -47,6 +47,7 @@
   <ItemGroup>
      <Compile Include="Assets\Test.cs" />
      <Compile Include="Assets\gyrotest.cs" />
+     <Compile Include="Assets\unEditableGameObject.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
