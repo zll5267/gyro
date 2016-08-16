@@ -19,6 +19,20 @@ public class gyrotest : MonoBehaviour {
 	public GameObject cube;
 	private Vector3 cubecurrentposition;
 
+    AndroidJavaObject mJO;
+
+    private float getSensorInfoX() {
+        //AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
+        //AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject> ("currentActivity");
+
+        float gyrox = mJO.Call<float> ("getSensorInfoX");
+        return gyrox;
+    }
+
+    void Start() {
+        mJO = new AndroidJavaObject("com.example.koufula.gyrowififorunity.Main");
+    }
+
 	// Update is called once per frame
 	void Update () {
 		//当用户按下手机的返回键或home键退出游戏
@@ -27,9 +41,7 @@ public class gyrotest : MonoBehaviour {
 			Application.Quit();
 		}
 		if (connect) {
-			AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
-			AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject> ("currentActivity");
-			float mGyrox = jo.Call<float> ("getSensorInfoX");
+            float mGyrox = getSensorInfoX ();
 			backup.text = mGyrox.ToString ();
 			oldValue = newValue;
 			newValue = mGyrox;
@@ -62,9 +74,7 @@ public class gyrotest : MonoBehaviour {
 
 	public void getGyroxInUnity(){
 		
-		AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
-		AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject> ("currentActivity");
-		float mGyrox = jo.Call<float> ("getSensorInfoX");
+        float mGyrox = getSensorInfoX ();
 		float fe1 = 100;
 		text.text = fe1.ToString();
 		//backup.text = fe1.ToString ();
@@ -73,9 +83,10 @@ public class gyrotest : MonoBehaviour {
 
 	}
 	public void setIpPorttoAndroid(){
-		AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
-		AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject> ("currentActivity");
-		jo.Call("startDataReceiveThread",ip.text,port.text);
+		//AndroidJavaClass jc = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
+		//AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject> ("currentActivity");
+        //AndroidJavaObject jo = new AndroidJavaObject("com.example.koufula.gyrowififorunity.Main");
+		mJO.Call("startDataReceiveThread",ip.text,port.text);
 		connect = true;
 	}
 }
