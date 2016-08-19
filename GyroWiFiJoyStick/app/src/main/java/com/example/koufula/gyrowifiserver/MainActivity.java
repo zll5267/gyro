@@ -7,6 +7,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private ServerThread serverThread;
-    public static final String TAG = "GyroWiFiServer";
+    public static final String TAG = "GyroWiFiJoyStick";
 
     //陀螺仪相关
     private SensorManager mSensorManager;
@@ -39,12 +41,36 @@ public class MainActivity extends AppCompatActivity {
     private float gyrox = 0, gyroy = 0, gyroz = 0;
     private float mAccX = 0, mAccY = 0, mAccZ = 0;
 
+    private TextView statusView;
+    private final int UPDATE_STATUS_VIEW_EVENT = 0;
+    private Handler statusHandler = new Handler(){//线程与UI交互更新界面
+        public void handleMessage(Message msg){
+            int what = msg.what;
+            Log.d(TAG, "in statusHandler what:" + what);
+            switch (what) {
+                case UPDATE_STATUS_VIEW_EVENT:
+                if (statusView != null) {
+                    String value = (String)msg.obj;
+                    statusView.setText(value);
+                }
+            }
+
+        }
+    };
     private boolean mRunning;
     //手动增加代码开始
     private View.OnClickListener myCloseOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            mRunning = false;
-            Log.d(TAG, "in myOnClickListener");
+            if (mRunning) {
+                mRunning = false;
+                Log.d(TAG, "in myOnClickListener");
+                if (serverThread != null) {
+                    serverThread.interrupt();
+                }
+                serverThread = null;
+            } else {
+                Log.d(TAG, "in myOnClickListener not running");
+            }
         }
     };
     //手动增加代码结束
@@ -66,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
         mCloseBtn = (Button) findViewById(R.id.closeID);
         mCloseBtn.setOnClickListener(myCloseOnClickListener);
+        statusView = (TextView) MainActivity.this.findViewById(R.id.statusID);
 
         //从系统服务中获得传感器管服务
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -98,10 +125,11 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "port is: " + port);
                     if (port.equals("")) {
                         Log.d(TAG, "in if port is: " + port);
-                        Toast.makeText(MainActivity.this, port, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "port is not set", Toast.LENGTH_SHORT).show();
                     } else {
                         Log.d(TAG, "in else port is: " + port);
-                        serverThread = new ServerThread(port);
+                        int p = Integer.parseInt(port);
+                        serverThread = new ServerThread(p);
                         serverThread.start();
                         Toast.makeText(MainActivity.this, port, Toast.LENGTH_SHORT).show();
                     }
@@ -116,32 +144,36 @@ public class MainActivity extends AppCompatActivity {
         private OutputStream out;
         private int port;
 
-        TextView statusView;
-
-        public ServerThread(String port) {
-            this.port = Integer.parseInt(port);
-            statusView = (TextView) MainActivity.this.findViewById(R.id.statusID);
-
+        public ServerThread(int port) {
+            this.port = port;
         }
 
         public void run() {
             //新建ServerSocket对象,端口为传进来的port;
+            Message msg;
+            mRunning = false;
             try {
                 //ss= new ServerSocket(1821);
                 ss = new ServerSocket(port);
                 Log.d("GyroWIFI", "before accept");
-                statusView.setText("连接状态：等待连接");
+                msg = statusHandler.obtainMessage(UPDATE_STATUS_VIEW_EVENT, "连接状态：等待连接");
+                statusHandler.sendMessage(msg);
                 s = ss.accept();
                 Log.d("GyroWIFI", "after accept");
-                statusView.setText("连接状态：连接建立");
+                msg = statusHandler.obtainMessage(UPDATE_STATUS_VIEW_EVENT, "连接状态：连接建立");
+                statusHandler.sendMessage(msg);
                 out = s.getOutputStream();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 //e.printStackTrace();
                 Log.d("GyroWIFI", "accept failure");
-                statusView.setText("连接状态：建立失败");
+                msg = statusHandler.obtainMessage(UPDATE_STATUS_VIEW_EVENT, "连接状态：建立失败");
+                statusHandler.sendMessage(msg);
+                return;
             }
 
-            statusView.setText("连接状态：发送数据中...");
+            Log.d("GyroWIFI", "before send info");
+            msg = statusHandler.obtainMessage(UPDATE_STATUS_VIEW_EVENT, "连接状态：发送数据中...");
+            statusHandler.sendMessage(msg);
             mRunning = true;
             try {
                 while (true) {
@@ -157,7 +189,8 @@ public class MainActivity extends AppCompatActivity {
                 //e.printStackTrace();
             }
             Log.d("GyroWIFI", "send close");
-            statusView.setText("连接状态：等待连接");
+            msg = statusHandler.obtainMessage(UPDATE_STATUS_VIEW_EVENT, "连接状态：连接关闭");
+            statusHandler.sendMessage(msg);
         }
 
         public void sendSensorInfo(SensorInfo buffer) throws Exception {
