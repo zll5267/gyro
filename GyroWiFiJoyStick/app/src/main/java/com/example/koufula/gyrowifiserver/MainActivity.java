@@ -26,7 +26,7 @@ import java.net.Socket;
 
 import com.example.koufula.util.SensorInfo;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorInfoProvider{
 
 
     private ServerThread serverThread;
@@ -220,7 +220,10 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         mRunning = false;
     }
-
+    public SensorInfo getSensorInfo() {
+        SensorInfo sensorInfo = new SensorInfo(gyrox, gyroy, gyroz, mAccX, mAccY, mAccZ);
+        return sensorInfo;
+    }
     public void showgyroinfo() {
         showInfo("事件：" + " x:" + gyrox + " y:" + gyroy + " z:" + gyroz);
     }
