@@ -29,7 +29,8 @@ import com.example.koufula.util.SensorInfo;
 public class MainActivity extends AppCompatActivity implements SensorInfoProvider{
 
 
-    private ServerThread serverThread;
+    //private ServerThread serverThread;
+    private MultiplexerServer serverThread;
     public static final String TAG = "GyroWiFiJoyStick";
 
     //陀螺仪相关
@@ -57,17 +58,18 @@ public class MainActivity extends AppCompatActivity implements SensorInfoProvide
 
         }
     };
-    private boolean mRunning;
+
     //手动增加代码开始
     private View.OnClickListener myCloseOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (mRunning) {
-                mRunning = false;
-                Log.d(TAG, "in myOnClickListener");
-                if (serverThread != null) {
-                    serverThread.interrupt();
+            if (serverThread != null) {
+                boolean result = serverThread.stop();
+                if(result) {
+                    Log.d(TAG, "in myOnClickListener, try to stop server");
                 }
-                serverThread = null;
+                else {
+                    Log.d(TAG, "in myOnClickListener, server already stop");
+                }
             } else {
                 Log.d(TAG, "in myOnClickListener not running");
             }
@@ -119,30 +121,36 @@ public class MainActivity extends AppCompatActivity implements SensorInfoProvide
         //监听服务器开启
         mStartBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                if (serverThread == null) {
-                    EditText portEditText = (EditText) MainActivity.this.findViewById(R.id.portID);
-                    String port = portEditText.getText().toString().trim();
-                    Log.d(TAG, "port is: " + port);
-                    if (port.equals("")) {
-                        Log.d(TAG, "in if port is: " + port);
-                        Toast.makeText(MainActivity.this, "port is not set", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.d(TAG, "in else port is: " + port);
-                        int p = Integer.parseInt(port);
-                        serverThread = new ServerThread(p);
-                        serverThread.start();
-                        Toast.makeText(MainActivity.this, port, Toast.LENGTH_SHORT).show();
+                if (serverThread != null) {
+                    boolean stopped = serverThread.isStopped();
+                    if (!stopped) {
+                        Log.d(TAG, "server already started");
+                        return;
                     }
+                }
+                EditText portEditText = (EditText) MainActivity.this.findViewById(R.id.portID);
+                String port = portEditText.getText().toString().trim();
+                Log.d(TAG, "port is: " + port);
+                if (port.equals("")) {
+                    Log.d(TAG, "in if port is: " + port);
+                    Toast.makeText(MainActivity.this, "port is not set", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.d(TAG, "in else port is: " + port);
+                    int p = Integer.parseInt(port);
+                    serverThread = new MultiplexerServer(p, MainActivity.this);
+                    new Thread(serverThread).start();
+                    Toast.makeText(MainActivity.this, port, Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-    class ServerThread extends Thread {
+    /*class ServerThread extends Thread {
         private ServerSocket ss;
         private Socket s;
         private OutputStream out;
         private int port;
+        boolean mRunning;
 
         public ServerThread(int port) {
             this.port = port;
@@ -206,19 +214,17 @@ public class MainActivity extends AppCompatActivity implements SensorInfoProvide
             bo.close();
             oo.close();
         }
-    }
+    }*/
 
     // 陀螺仪相关代码
     @Override
     protected void onResume() {
         super.onResume();
-        mRunning = true;
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mRunning = false;
     }
     public SensorInfo getSensorInfo() {
         SensorInfo sensorInfo = new SensorInfo(gyrox, gyroy, gyroz, mAccX, mAccY, mAccZ);

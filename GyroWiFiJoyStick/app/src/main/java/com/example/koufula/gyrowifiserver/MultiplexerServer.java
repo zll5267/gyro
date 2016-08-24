@@ -13,6 +13,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
+import android.util.Log;
 
 /**
  * Created by ezhalel on 2016/8/23.
@@ -24,6 +25,7 @@ public class MultiplexerServer implements Runnable{
     private volatile boolean stop;
     private boolean connected;// now we only support one client
     private SocketChannel connectChannel;//the connection with the client
+    private final String TAG = "MultiplexerServer";
 
     SensorInfoProvider sensorInfoProvider;
 
@@ -35,15 +37,28 @@ public class MultiplexerServer implements Runnable{
             servChannel.socket().bind(new InetSocketAddress(port), 10);
             servChannel.register(selector, SelectionKey.OP_ACCEPT);
             sensorInfoProvider = provider;
-            System.out.println("the server is start on port:" + port);
+            //System.out.println("the server is start on port:" + port);
+            Log.d(TAG, "the server is start on port:" + port);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
+            //e.printStackTrace();
+            //System.exit(1);
+            Log.d(TAG, "MultiplexerServer() catch IOException:" + e);
         }
     }
 
-    public void stop() {
+    /*
+        @return false: means already stop, true means try to stop
+     */
+    public boolean stop() {
+        if(this.stop) {
+            return false;
+        }
         this.stop = true;
+        return true;
+    }
+
+    public boolean isStopped() {
+        return this.stop;
     }
 
     @Override
@@ -52,6 +67,7 @@ public class MultiplexerServer implements Runnable{
         while(!stop) {
             try {
                 if (!connected) {
+                    Log.d(TAG, "waiting connecting ...");
                     selector.select(1000);
                     Set<SelectionKey> selectedKeys = selector.selectedKeys();
                     Iterator<SelectionKey> it = selectedKeys.iterator();
@@ -60,7 +76,6 @@ public class MultiplexerServer implements Runnable{
                         key = it.next();
                         it.remove();
                         try {
-                            //handleInput(key);
                             if (key.isValid()) {
                                 //new connection
                                 if (key.isAcceptable()) {
@@ -94,10 +109,13 @@ public class MultiplexerServer implements Runnable{
                     writeBuffer.put(bytes);
                     writeBuffer.flip();
                     connectChannel.write(writeBuffer);
+                    //System.out.print("send sensorInfo:" + sensorInfo);
+                    Log.d(TAG, "send sensorInfo:" + sensorInfo);
                     Thread.sleep(200);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                Log.d(TAG, "run() catch Exception" + e);
             }
         }
 
@@ -105,15 +123,18 @@ public class MultiplexerServer implements Runnable{
             try {
                 selector.close();
             } catch (IOException e) {
-                e.printStackTrace();;
+                //e.printStackTrace();;
+                Log.d(TAG, "close catch IOException" + e);
             }
         }
     }
 
     public static void main(String[] args) {
         class TestProvider implements SensorInfoProvider {
+            private int value;
             public SensorInfo getSensorInfo() {
-                SensorInfo sensorInfo = new SensorInfo(1, 2, 3, 4, 5, 6);
+                SensorInfo sensorInfo = new SensorInfo(value, value, value, value, value, value);
+                value++;
                 return sensorInfo;
             }
         }
