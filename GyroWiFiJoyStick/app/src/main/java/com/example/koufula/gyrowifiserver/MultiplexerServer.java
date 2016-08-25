@@ -121,6 +121,9 @@ public class MultiplexerServer implements Runnable{
 
         if (selector != null) {
             try {
+                if (servChannel != null) {
+                    servChannel.close();
+                }
                 selector.close();
             } catch (IOException e) {
                 //e.printStackTrace();;
