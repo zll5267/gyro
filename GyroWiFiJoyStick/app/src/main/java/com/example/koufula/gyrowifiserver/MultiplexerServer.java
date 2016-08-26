@@ -13,6 +13,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
+
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 /**
@@ -28,8 +31,9 @@ public class MultiplexerServer implements Runnable{
     private final String TAG = "MultiplexerServer";
 
     SensorInfoProvider sensorInfoProvider;
+    Handler uiHandler;
 
-    public MultiplexerServer(int port, SensorInfoProvider provider) {
+    public MultiplexerServer(int port, SensorInfoProvider provider, Handler handler) {
         try {
             selector = Selector.open();
             servChannel = ServerSocketChannel.open();
@@ -37,7 +41,9 @@ public class MultiplexerServer implements Runnable{
             servChannel.socket().bind(new InetSocketAddress(port), 10);
             servChannel.register(selector, SelectionKey.OP_ACCEPT);
             sensorInfoProvider = provider;
+            uiHandler = handler;
             //System.out.println("the server is start on port:" + port);
+            //Log.d(TAG, "the server uihandle:" + handler);
             Log.d(TAG, "the server is start on port:" + port);
         } catch (IOException e) {
             //e.printStackTrace();
@@ -64,10 +70,12 @@ public class MultiplexerServer implements Runnable{
     @Override
     public void run() {
         connected = false;
+        updateUI("连接状态：等待连接");
         while(!stop) {
             try {
                 if (!connected) {
-                    Log.d(TAG, "waiting connecting ...");
+                    Log.d(TAG, "waiting connecting ..." + uiHandler);
+
                     selector.select(1000);
                     Set<SelectionKey> selectedKeys = selector.selectedKeys();
                     Iterator<SelectionKey> it = selectedKeys.iterator();
@@ -84,6 +92,7 @@ public class MultiplexerServer implements Runnable{
                                     connectChannel.configureBlocking(false);
                                     connected = true;
                                     //connectChannel.register(selector, SelectionKey.OP_READ);
+                                    updateUI("连接状态：连接成功");
                                 }
                             }
                         } catch (Exception e) {
@@ -93,6 +102,8 @@ public class MultiplexerServer implements Runnable{
                                     key.channel().close();
                                 ;
                             }
+                            this.stop = true;
+                            updateUI("连接状态：异常关闭");
                         }
                     }
                 } else {
@@ -116,6 +127,8 @@ public class MultiplexerServer implements Runnable{
             } catch (Exception e) {
                 //e.printStackTrace();
                 Log.d(TAG, "run() catch Exception" + e);
+                this.stop = true;
+                updateUI("连接状态：异常关闭");
             }
         }
 
@@ -130,6 +143,14 @@ public class MultiplexerServer implements Runnable{
                 Log.d(TAG, "close catch IOException" + e);
             }
         }
+        updateUI("连接状态：连接关闭");
+    }
+
+    private void updateUI(String info){
+        if (uiHandler != null) {
+            Message msg = uiHandler.obtainMessage(MainActivity.UPDATE_STATUS_VIEW_EVENT, info);
+            uiHandler.sendMessage(msg);
+        }
     }
 
     public static void main(String[] args) {
@@ -142,7 +163,7 @@ public class MultiplexerServer implements Runnable{
             }
         }
         int port = 8080;
-        MultiplexerServer server = new MultiplexerServer(port, new TestProvider());
+        MultiplexerServer server = new MultiplexerServer(port, new TestProvider(), null);
         new Thread(server).start();
     }
 

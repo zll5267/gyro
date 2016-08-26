@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements SensorInfoProvide
     private float mAccX = 0, mAccY = 0, mAccZ = 0;
 
     private TextView statusView;
-    private final int UPDATE_STATUS_VIEW_EVENT = 0;
+    public static final int UPDATE_STATUS_VIEW_EVENT = 0;
     private Handler statusHandler = new Handler(){//线程与UI交互更新界面
         public void handleMessage(Message msg){
             int what = msg.what;
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements SensorInfoProvide
                 } else {
                     Log.d(TAG, "in else port is: " + port);
                     int p = Integer.parseInt(port);
-                    serverThread = new MultiplexerServer(p, MainActivity.this);
+                    serverThread = new MultiplexerServer(p, MainActivity.this, statusHandler);
                     new Thread(serverThread).start();
                     Toast.makeText(MainActivity.this, port, Toast.LENGTH_SHORT).show();
                 }
